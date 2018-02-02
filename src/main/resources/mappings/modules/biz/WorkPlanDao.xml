@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.biz.dao.WorkPlanDao">
+    
+    <sql id="workPlanColumns">
+        a.id,
+        a.ryId,
+        su.name AS "rymc",
+        a.nd,
+        a.sj,
+        a.lb,
+        a.gjz,
+        a.gznr,
+        a.djly,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <sql id="workPlanJoins">
+        LEFT JOIN sys_user su ON a.ryId = su.id
+    </sql>
+    
+    <!-- 根据编号获得工作计划 -->
+	<select id="get" resultType="WorkPlan">
+		SELECT
+			<include refid="workPlanColumns"/>
+		FROM ywgz_zrqgzjh a
+		<include refid="workPlanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getWorkPlanList" resultType="WorkPlan">
+		SELECT
+			<include refid="workPlanColumns"/>
+		FROM ywgz_zrqgzjh a
+		<include refid="workPlanJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="ryId != null and ryId != ''">
+			AND a.ryId = #{ryId}
+		</if>
+		order by a.nd desc,a.create_date desc
+	</select>
+	
+	<select id="getWorkPlanListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM ywgz_zrqgzjh a
+		<include refid="workPlanJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="ryId != null and ryId != ''">
+			AND a.ryId = #{ryId}
+		</if>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ywgz_zrqgzjh(
+			id, 
+			ryId, 
+			nd, 
+			sj,
+			lb,
+			gjz,
+			gznr,
+			djly,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{ryId}, 
+			#{nd}, 
+			#{sj}, 
+			#{lb}, 
+			#{gjz}, 
+			#{gznr}, 
+			#{djly},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ywgz_zrqgzjh SET 
+		    ryId = #{ryId},
+		    nd = #{nd},
+		    sj = #{sj},
+		    lb = #{lb},   
+		    gjz = #{gjz},   
+		    gznr = #{gznr},   
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ywgz_zrqgzjh SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+	<insert id="insertFileList">
+		INSERT INTO ywgz_tpfjb(id, autoId, tplj, lx, tpmc, djly)
+		<foreach collection="fileList" item="file" separator=" union all ">
+			SELECT #{id}, #{file.autoId}, #{file.tplj}, #{file.lx}, #{file.tpmc}, #{file.djly}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<select id="getFileListById" parameterType="String" resultType="UploadFileInfo">
+		SELECT
+			*
+		FROM ywgz_tpfjb
+		WHERE id = #{id}
+	</select>
+	
+	<delete id="deleteFileList">
+		DELETE FROM ywgz_tpfjb WHERE id = #{id}
+	</delete>
+	
+</mapper>

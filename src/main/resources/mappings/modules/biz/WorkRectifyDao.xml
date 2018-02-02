@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.biz.dao.WorkRectifyDao">
+    
+    <sql id="workRectifyColumns">
+        a.id,
+        a.zbId,
+        a.djbh,
+        a.xxId,
+        bx.xxmc AS "xxmc",
+        su.name AS "rymc",
+        a.wtgjz,
+        a.zgnr,
+        a.xdrq,
+        a.dqzt,
+        a.xqsj,
+        a.xxzgjh,
+        a.hfjl,
+        a.zgbg,
+        a.pjjl,
+        a.djly,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <sql id="workRectifyJoins">
+        LEFT JOIN sys_user su ON a.create_by = su.id
+        LEFT JOIN base_xxxx bx ON a.xxId = bx.id
+    </sql>
+    
+    <!-- 根据编号获得问题整改通知书记录 -->
+	<select id="get" resultType="WorkRectify">
+		SELECT
+			<include refid="workRectifyColumns"/>
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getWorkRectifyList" resultType="WorkRectify">
+		SELECT
+			<include refid="workRectifyColumns"/>
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by a.xdrq desc,a.dqzt
+	</select>
+	
+	<select id="getWorkRectifyListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<select id="getAllRectify" resultType="WorkRectify">
+		SELECT
+			<include refid="workRectifyColumns"/>
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="dqzt != null and dqzt != ''">
+			AND a.dqzt = #{dqzt}
+		</if>
+		<if test="wtgjz != null and wtgjz != ''">
+			AND wtgjz LIKE 
+					<if test="dbName == 'oracle'">'%'||#{wtgjz}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{wtgjz}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{wtgjz}, '%')</if>
+		</if>
+		order by a.xdrq desc,a.dqzt
+	</select>
+	
+	<select id="getAllRectifyCount" resultType="int">
+		SELECT
+			count(*)
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="dqzt != null and dqzt != ''">
+			AND a.dqzt = #{dqzt}
+		</if>
+		<if test="wtgjz != null and wtgjz != ''">
+			AND wtgjz LIKE 
+					<if test="dbName == 'oracle'">'%'||#{wtgjz}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{wtgjz}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{wtgjz}, '%')</if>
+		</if>
+	</select>
+	
+	<select id="getRectifyBySchool" parameterType="HashMap" resultType="WorkRectify">
+		SELECT
+			<include refid="workRectifyColumns"/>
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.del_flag = '0'
+		<if test="dqzt != null and dqzt != ''">
+			AND a.dqzt = #{dqzt}
+		</if>
+		<if test="wtgjz != null and wtgjz != ''">
+			AND wtgjz LIKE 
+					<if test="dbName == 'oracle'">'%'||#{wtgjz}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{wtgjz}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{wtgjz}, '%')</if>
+		</if>
+		AND a.xxId in 
+		  <foreach collection="xxIds" item="xxId" index="index"
+            open="(" close=")" separator=",">
+            #{xxId}
+          </foreach>
+		order by a.xdrq desc,a.dqzt
+	</select>
+	
+	<select id="getRectifyCountBySchool" parameterType="HashMap" resultType="int">
+		SELECT
+			count(*)
+		FROM ywgz_wtzgtzb a
+		<include refid="workRectifyJoins"/>
+		WHERE a.del_flag = '0'
+		<if test="dqzt != null and dqzt != ''">
+			AND a.dqzt = #{dqzt}
+		</if>
+		<if test="wtgjz != null and wtgjz != ''">
+			AND wtgjz LIKE 
+					<if test="dbName == 'oracle'">'%'||#{wtgjz}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{wtgjz}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{wtgjz}, '%')</if>
+		</if>
+		AND a.xxId in 
+		  <foreach collection="xxIds" item="xxId" index="index"
+            open="(" close=")" separator=",">
+            #{xxId}
+          </foreach>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ywgz_wtzgtzb(
+			id,
+            zbId,
+            djbh,
+            xxId,
+            gznr,
+            wtgjz,
+            zgnr,
+            xdrq,
+            dqzt,
+            xqsj,
+            xxzgjh,
+            hfjl,
+            zgbg,
+            pjjl,
+            djly,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{zbId}, 
+			#{djbh}, 
+			#{xxId}, 
+			#{gznr},
+			#{wtgjz},
+			#{zgnr}, 
+			#{xdrq}, 
+			#{dqzt}, 
+			#{xqsj}, 
+			#{xxzgjh}, 
+			#{hfjl}, 
+			#{zgbg}, 
+			#{pjjl}, 
+			#{djly},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ywgz_wtzgtzb SET 
+		    zgnr = #{zgnr},
+		    dqzt = #{dqzt},
+		    xqsj = #{xqsj},
+		    xxzgjh = #{xxzgjh},
+		    hfjl = #{hfjl},
+		    zgbg = #{zgbg},
+		    pjjl = #{pjjl},
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ywgz_wtzgtzb SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+	
+	<insert id="insertFileList">
+		INSERT INTO ywgz_tpfjb(id, autoId, tplj, lx, tpmc, nrlx, djly)
+		<foreach collection="fileList" item="file" separator=" union all ">
+			SELECT #{id}, #{file.autoId}, #{file.tplj}, #{file.lx}, #{file.tpmc}, #{file.nrlx}, #{file.djly}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<select id="getFileListById" parameterType="String" resultType="UploadFileInfo">
+		SELECT
+			*
+		FROM ywgz_tpfjb
+		WHERE id = #{id}
+	</select>
+	
+	<delete id="deleteFileList">
+		DELETE FROM ywgz_tpfjb WHERE id = #{id}
+	</delete>
+</mapper>

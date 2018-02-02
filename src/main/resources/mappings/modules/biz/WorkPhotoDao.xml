@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.biz.dao.WorkPhotoDao">
+    
+    <sql id="workPhotoColumns">
+        a.id,
+        a.title,
+        a.publisher,
+        su1.name AS "publishermc",
+        a.releaseDate,
+        a.newsContent,
+        a.classId,
+        sd1.label AS "classmc",
+        a.imgPath,
+        a.xxId,
+        bx.xxmc AS "xxmc",
+        a.checkId,
+        su2.name AS "checkmc",
+        a.checkDate,
+        a.states,
+        a.djly,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <sql id="workPhotoJoins">
+        LEFT JOIN sys_user su1 ON a.publisher = su1.id
+        LEFT JOIN sys_user su2 ON a.checkId = su2.id
+        LEFT JOIN base_xxxx bx ON a.xxId = bx.id
+        LEFT JOIN sys_dict sd1 ON a.classId = sd1.value and sd1.type='base_file_type'
+    </sql>
+    
+    <!-- 根据编号获得工作掠影 -->
+	<select id="get" resultType="WorkPhoto">
+		SELECT
+			<include refid="workPhotoColumns"/>
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getWorkPhotoList" resultType="WorkPhoto">
+		SELECT
+			<include refid="workPhotoColumns"/>
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.classId = #{classId}
+		<if test="publisher != null and publisher != ''">
+			AND a.publisher = #{publisher}
+		</if>
+		<if test="states != null and states != ''">
+			AND a.states = #{states}
+		</if>
+		order by a.create_date desc
+	</select>
+	
+	<select id="getWorkPhotoListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.classId = #{classId}
+		<if test="publisher != null and publisher != ''">
+			AND a.publisher = #{publisher}
+		</if>
+		<if test="states != null and states != ''">
+			AND a.states = #{states}
+		</if>
+	</select>
+	
+	
+	<!-- 文件通知操作 -->
+	<select id="getFileInfoList" resultType="WorkPhoto">
+		SELECT
+			<include refid="workPhotoColumns"/>
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.classId != #{classId}
+		<if test="publisher != null and publisher != ''">
+			AND a.publisher = #{publisher}
+		</if>
+		<if test="title != null and title != ''">
+			AND title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+		</if>
+		order by a.create_date desc
+	</select>
+	
+	<select id="getFileInfoListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.classId != #{classId}
+		<if test="publisher != null and publisher != ''">
+			AND a.publisher = #{publisher}
+		</if>
+		<if test="title != null and title != ''">
+			AND title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+		</if>
+	</select>
+	
+	<select id="getFileInfoListByType" resultType="WorkPhoto">
+		SELECT
+			<include refid="workPhotoColumns"/>
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.classId = #{classId}
+		<if test="publisher != null and publisher != ''">
+			AND a.publisher = #{publisher}
+		</if>
+		<if test="title != null and title != ''">
+			AND title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+		</if>
+		order by a.create_date desc
+	</select>
+	
+	<select id="getFileInfoListCountByType" resultType="int">
+		SELECT
+			count(*)
+		FROM website_newslist a
+		<include refid="workPhotoJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.classId = #{classId}
+		<if test="publisher != null and publisher != ''">
+			AND a.publisher = #{publisher}
+		</if>
+		<if test="title != null and title != ''">
+			AND title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+		</if>
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO website_newslist(
+			id, 
+			title, 
+			publisher, 
+			releaseDate,
+			newsContent,
+			classId,
+			imgPath,
+			xxId,
+			checkId,
+			checkDate,
+			states,
+			djly,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{title}, 
+			#{publisher}, 
+			#{releaseDate}, 
+			#{newsContent}, 
+			#{classId}, 
+			#{imgPath}, 
+			#{xxId},
+			#{checkId},
+			#{checkDate},
+			#{states},
+			#{djly},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE website_newslist SET 
+		    title = #{title},
+		    <!-- publisher = #{publisher},
+		    releaseDate = #{releaseDate}, -->
+		    newsContent = #{newsContent},   
+		    <!-- classId = #{classId},    -->
+		    imgPath = #{imgPath},   
+		    xxId = #{xxId},
+		    checkId = #{checkId},
+		    checkDate = #{checkDate},
+		    states = #{states},
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateStates">
+		UPDATE website_newslist SET 
+		    checkId = #{checkId},
+		    checkDate = #{checkDate},
+		    states = #{states}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE website_newslist SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<insert id="insertFileList">
+		INSERT INTO ywgz_tpfjb(id, autoId, tplj, lx, tpmc, djly)
+		<foreach collection="fileList" item="file" separator=" union all ">
+			SELECT #{id}, #{file.autoId}, #{file.tplj}, #{file.lx}, #{file.tpmc}, #{file.djly}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<select id="getFileListById" parameterType="String" resultType="UploadFileInfo">
+		SELECT
+			*
+		FROM ywgz_tpfjb
+		WHERE id = #{id}
+	</select>
+	
+	<delete id="deleteFileList">
+		DELETE FROM ywgz_tpfjb WHERE id = #{id}
+	</delete>
+</mapper>

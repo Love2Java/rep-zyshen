@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.base.dao.RspAreaDao">
+    
+    <sql id="RspAreaColumns">
+        a.id,
+        a.zrqId,
+        sd1.label AS "zrqmc",
+        a.zrzId,
+        sd2.label AS "zrzmc",
+        a.xxId,
+        bx.xxmc AS "xxmc",
+        a.zrdxryId,
+        a.zzryId,
+        su1.name AS "zzrymc",
+        a.llryId,
+        su2.name AS "llrymc",
+        a.bbh,
+        a.bbrq,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <sql id="RspAreaJoins">
+        LEFT JOIN sys_dict sd1 ON a.zrqId = sd1.value and sd1.type='base_zrq'
+        LEFT JOIN sys_dict sd2 ON a.zrzId = sd2.value and sd2.type='base_zrz'
+        LEFT JOIN base_xxxx bx ON a.xxId = bx.id
+        LEFT JOIN sys_user su1 ON a.zzryId = su1.id
+        LEFT JOIN sys_user su2 ON a.llryId = su2.id
+    </sql>
+    
+    <!-- 根据编号获得责任区信息 -->
+	<select id="get" resultType="RspArea">
+		SELECT
+			<include refid="RspAreaColumns"/>
+		FROM base_zrqgzb a
+		<include refid="RspAreaJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getRspAreaList" resultType="RspArea">
+		SELECT
+			<include refid="RspAreaColumns"/>
+		FROM base_zrqgzb a
+		<include refid="RspAreaJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by a.zrqId,a.zrzId,bx.xxmc
+	</select>
+	
+	<select id="getRspAreaListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM base_zrqgzb a
+		<include refid="RspAreaJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<select id="getSchoolsByUserId" parameterType="String" resultType="RspArea">
+		SELECT
+			<include refid="RspAreaColumns"/>
+		FROM base_zrqgzb a
+		<include refid="RspAreaJoins"/>
+		WHERE a.del_flag = '0'
+		AND ((a.llryId = #{userId}) or (a.zzryId = #{userId}) or (a.zrdxryId like '%'||#{userId}||'%'))
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO base_zrqgzb(
+			id, 
+			zrqId, 
+			zrzId, 
+			xxId,
+			zrdxryId,
+			zzryId,
+			llryId,
+			bbh,
+			bbrq,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{zrqId}, 
+			#{zrzId}, 
+			#{xxId}, 
+			#{zrdxryId}, 
+			#{zzryId}, 
+			#{llryId}, 
+			#{bbh}, 
+			#{bbrq}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE base_zrqgzb SET 
+		    zrqId = #{zrqId},
+		    zrzId = #{zrzId},
+		    xxId = #{xxId},
+		    zrdxryId = #{zrdxryId},   
+		    zzryId = #{zzryId},   
+		    llryId = #{llryId},   
+		    bbh = #{bbh},   
+		    bbrq = #{bbrq},   
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE base_zrqgzb SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

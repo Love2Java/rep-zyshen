@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.base.dao.SchoolDao">
+    
+    <sql id="schoolColumns">
+        a.id,
+        a.xxmc,
+        a.xxlx,
+        sd1.label AS "xxlxmc",
+        a.dwdm,
+        a.zcdz,
+        a.lxdh,
+        a.lxr,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <sql id="schoolJoins">
+        LEFT JOIN sys_dict sd1 ON a.xxlx = sd1.value and sd1.type='base_school_xxlx'
+    </sql>
+    
+    <!-- 根据编号获得学校信息 -->
+	<select id="get" resultType="School">
+		SELECT
+			<include refid="schoolColumns"/>
+		FROM base_xxxx a
+		<include refid="schoolJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<!-- 根据名称获得学校信息 -->
+	<select id="getSchoolByXxmc" resultType="School" parameterType="School">
+		SELECT
+			<include refid="schoolColumns"/>
+		FROM base_xxxx a
+		<include refid="schoolJoins"/>
+		WHERE a.xxmc = #{xxmc} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<select id="getSchoolList" resultType="School">
+		SELECT
+			<include refid="schoolColumns"/>
+		FROM base_xxxx a
+		<include refid="schoolJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by a.xxmc
+	</select>
+	
+	<select id="getSchoolListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM base_xxxx a
+		<include refid="schoolJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<select id="getSchoolByUser" parameterType="HashMap" resultType="School">
+		SELECT
+			<include refid="schoolColumns"/>
+		FROM base_xxxx a
+		<include refid="schoolJoins"/>
+		WHERE a.del_flag = '0'
+		AND a.id in 
+		  <foreach collection="xxIds" item="xxId" index="index"
+            open="(" close=")" separator=",">
+            #{xxId}
+          </foreach>
+		order by a.xxmc
+	</select>
+	
+	<select id="getSchoolCountByUser" parameterType="HashMap" resultType="int">
+		SELECT
+			count(*)
+		FROM base_xxxx a
+		<include refid="schoolJoins"/>
+		WHERE a.del_flag = '0'
+			AND a.id in 
+		  <foreach collection="xxIds" item="xxId" index="index"
+            open="(" close=")" separator=",">
+            #{xxId}
+          </foreach>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO base_xxxx(
+			id, 
+			xxmc, 
+			xxlx, 
+			dwdm,
+			zcdz,
+			lxdh,
+			lxr,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{xxmc}, 
+			#{xxlx}, 
+			#{dwdm}, 
+			#{zcdz}, 
+			#{lxdh}, 
+			#{lxr}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<!-- 更新学校信息 -->
+	<update id="update">
+		UPDATE base_xxxx SET 
+		    xxmc = #{xxmc},
+		    xxlx = #{xxlx},
+		    dwdm = #{dwdm},
+		    zcdz = #{zcdz},   
+		    lxdh = #{lxdh},   
+		    lxr = #{lxr},   
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 逻辑删除学校信息 -->
+	<update id="delete">
+		UPDATE base_xxxx SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

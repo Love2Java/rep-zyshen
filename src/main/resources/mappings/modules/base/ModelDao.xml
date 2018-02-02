@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.base.dao.ModelDao">
+    
+    <sql id="modelColumns">
+        a.id,
+        a.lx,
+        a.nd,
+        a.bbh,
+        a.wjbt,
+        a.wjjj,
+        a.zt,
+        a.gbrId,
+        su.name AS "gbrmc",
+        a.gbrq,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+     <sql id="modelJoins">
+        LEFT JOIN sys_user su ON a.gbrId = su.id
+    </sql>
+    
+    <!-- 根据编号获模板信息 -->
+	<select id="get" resultType="Models">
+		SELECT
+			<include refid="modelColumns"/>
+		FROM model_dd_dcwj a
+		<include refid="modelJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getModelList" resultType="Models">
+		SELECT
+			<include refid="modelColumns"/>
+		FROM model_dd_dcwj a
+		<include refid="modelJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by a.nd desc,a.lx, a.create_date desc
+	</select>
+	
+	<select id="getModelListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM model_dd_dcwj a
+		<include refid="modelJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO model_dd_dcwj(
+			id, 
+			lx, 
+			nd, 
+			bbh,
+			wjbt,
+			wjjj,
+			zt,
+			gbrId,
+			gbrq,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{lx}, 
+			#{nd}, 
+			#{bbh}, 
+			#{wjbt},
+			#{wjjj},
+			#{zt},
+			#{gbrId},
+			#{gbrq},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE model_dd_dcwj SET 
+		    lx = #{lx},
+		    nd = #{nd},
+		    bbh = #{bbh},
+		    wjbt = #{wjbt},
+		    wjjj = #{wjjj},
+		    zt = #{zt},
+		    gbrId = #{gbrId},
+		    gbrq = #{gbrq},
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE model_dd_dcwj SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<insert id="insertModelDetails">
+		INSERT INTO model_dd_dcwjmxb(zbId, wjnr)
+		<foreach collection="detailList" item="detail" separator=" union all ">
+			SELECT #{id}, #{detail.wjnr}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<select id="getModelDetailsById" parameterType="String" resultType="ModelDetail">
+		SELECT
+			*
+		FROM model_dd_dcwjmxb
+		WHERE zbId = #{zdId}
+	</select>
+	
+	<delete id="deleteModelDetails">
+		DELETE FROM model_dd_dcwjmxb WHERE zbId = #{zbId}
+	</delete>
+	
+</mapper>

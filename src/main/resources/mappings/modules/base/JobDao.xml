@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.base.dao.JobDao">
+    
+    <sql id="JobColumns">
+        a.id,
+        a.mc,
+        a.gjz,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <!-- 根据编号获得工作内容信息 -->
+	<select id="get" resultType="JobContent">
+		SELECT
+			<include refid="JobColumns"/>
+		FROM base_gznr a
+		WHERE a.id = #{id}
+	</select>
+	
+	<!-- 根据名称获得工作内容信息 -->
+	<select id="getJobContentByMc" resultType="JobContent" parameterType="JobContent">
+		SELECT
+			<include refid="JobColumns"/>
+		FROM base_gznr a
+		WHERE a.mc = #{mc} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<select id="getJobContentList" resultType="JobContent">
+		SELECT
+			<include refid="JobColumns"/>
+		FROM base_gznr a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by a.mc
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO base_gznr(
+			id, 
+			mc, 
+			gjz, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{mc}, 
+			#{gjz}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<!-- 更新工作内容信息 -->
+	<update id="update">
+		UPDATE base_gznr SET 
+		    mc = #{mc},
+		    gjz = #{gjz},
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 逻辑删除工作内容信息 -->
+	<update id="delete">
+		UPDATE base_gznr SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

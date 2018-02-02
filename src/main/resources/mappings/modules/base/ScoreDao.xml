@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.base.dao.ScoreDao">
+    
+    <sql id="scoreColumns">
+        a.id,
+        a.da,
+        a.fz,
+        a.bbh,
+        a.create_by AS "createBy.id",
+        a.create_date,
+        a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.remarks
+    </sql>
+    
+    <!-- 根据编号获得分值信息 -->
+	<select id="get" resultType="Score">
+		SELECT
+			<include refid="scoreColumns"/>
+		FROM base_wjfzb a
+		WHERE a.id = #{id}
+	</select>
+	
+	<!-- 新增和编辑验证 -->
+	<select id="getScoreBySave" resultType="Score">
+		SELECT
+			<include refid="scoreColumns"/>
+		FROM base_wjfzb a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.bbh = #{bbh} AND a.da = #{da}
+		<if test="id != null and id != ''">
+		AND a.id != #{id}
+		</if>
+	</select>
+	
+	<select id="getScoreList" resultType="Score">
+		SELECT
+			<include refid="scoreColumns"/>
+		FROM base_wjfzb a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="bbh != null and bbh != ''">
+			AND a.bbh = #{bbh}
+		</if>
+		order by a.bbh desc,a.da
+	</select>
+	
+	<select id="getScoreListCount" resultType="int">
+		SELECT
+			count(*)
+		FROM base_wjfzb a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="bbh != null and bbh != ''">
+			AND a.bbh = #{bbh}
+		</if>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO base_wjfzb(
+			id, 
+			da, 
+			fz, 
+			bbh,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{da}, 
+			#{fz}, 
+			#{bbh}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE base_wjfzb SET 
+		    da = #{da},
+		    fz = #{fz},
+		    bbh = #{bbh},
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE base_wjfzb SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
